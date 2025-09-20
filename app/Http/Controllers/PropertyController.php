@@ -1,0 +1,310 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Property;
+use App\Models\Image;
+use App\Services\LocationService;
+use App\Services\GeocodingService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+
+class PropertyController extends Controller
+{
+    public function index()
+    {
+        $user = Auth::user();
+        
+        if ($user->isAdmin()) {
+            // Admin sees all properties
+            $properties = Property::with(['landlord', 'images'])->paginate(10);
+        } elseif ($user->isLandlord()) {
+            // Landlord sees only their properties
+            $properties = Property::where('landlord_id', $user->id)->with(['landlord', 'images'])->paginate(10);
+        } else {
+            // Renters see only approved, available properties
+            $properties = Property::where('status', 'active')
+                                ->where('is_available', true)
+                                ->with(['landlord', 'images'])
+                                ->paginate(10);
+        }
+
+        return view('properties.index', compact('properties'));
+    }
+
+    public function show(Property $property)
+    {
+        $property->load(['landlord', 'images', 'propertyAmenities.amenity']);
+        
+        // Get nearby amenities if property has coordinates
+        $nearbyAmenities = collect();
+        if ($property->hasCoordinates()) {
+            $locationService = new LocationService();
+            $nearbyAmenities = $locationService->getCachedPropertyAmenities($property);
+        }
+        
+        return view('properties.show-enhanced', compact('property', 'nearbyAmenities'));
+    }
+
+    public function create()
+    {
+        // Only landlords can create properties
+        if (!Auth::user()->isLandlord()) {
+            abort(403);
+        }
+
+        return view('properties.create');
+    }
+
+    public function createEnhanced()
+    {
+        // Only landlords can create properties
+        if (!Auth::user()->isLandlord()) {
+            abort(403);
+        }
+
+        return view('properties.create-enhanced');
+    }
+
+    public function store(Request $request)
+    {
+        if (!Auth::user()->isLandlord()) {
+            abort(403);
+        }
+
+        try {
+            $validated = $request->validate([
+                'title' => 'required|string|max:255',
+                'description' => 'required|string',
+                'price' => 'required|numeric|min:0',
+                'type' => 'required|string|in:house,apartment,studio,condo,villa,townhouse,commercial',
+                'address' => 'required|string|max:500',
+                'neighborhood' => 'nullable|string|max:255',
+                'latitude' => 'nullable|numeric|between:-90,90',
+                'longitude' => 'nullable|numeric|between:-180,180',
+                'bedrooms' => 'required|integer|min:0',
+                'bathrooms' => 'required|integer|min:0',
+                'area' => 'nullable|numeric|min:0',
+                'parking_spaces' => 'nullable|integer|min:0',
+                'furnishing_status' => 'nullable|string|in:furnished,semi_furnished,unfurnished',
+                'has_balcony' => 'boolean',
+                'has_garden' => 'boolean',
+                'has_pool' => 'boolean',
+                'has_gym' => 'boolean',
+                'has_security' => 'boolean',
+                'has_elevator' => 'boolean',
+                'has_air_conditioning' => 'boolean',
+                'has_heating' => 'boolean',
+                'has_internet' => 'boolean',
+                'has_cable_tv' => 'boolean',
+                'pets_allowed' => 'boolean',
+                'smoking_allowed' => 'boolean',
+                'images.*' => 'nullable',
+                'blueprints.*' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:10240',
+                'image_types.*' => 'nullable|string|in:exterior,interior,kitchen,bathroom,bedroom,living_room,garden,parking',
+            ]);
+
+            // Geocode the address if coordinates are not provided
+            if (!$validated['latitude'] || !$validated['longitude']) {
+                try {
+                    $geocodingService = new GeocodingService();
+                    $coordinates = $geocodingService->geocodeWithFallback(
+                        $validated['address'],
+                        $validated['latitude'],
+                        $validated['longitude']
+                    );
+                    
+                    if ($coordinates) {
+                        $validated['latitude'] = $coordinates['latitude'];
+                        $validated['longitude'] = $coordinates['longitude'];
+                        if (isset($coordinates['formatted_address'])) {
+                            $validated['address'] = $coordinates['formatted_address'];
+                        }
+                    } else {
+                        // If geocoding fails, use default coordinates for Kigali
+                        $validated['latitude'] = -1.9441;
+                        $validated['longitude'] = 30.0619;
+                    }
+                } catch (\Exception $e) {
+                    // If geocoding fails, use default coordinates for Kigali
+                    $validated['latitude'] = -1.9441;
+                    $validated['longitude'] = 30.0619;
+                }
+            }
+
+            $validated['landlord_id'] = Auth::id();
+            $validated['status'] = 'pending'; // Requires admin approval
+            $validated['is_available'] = true; // Set default availability
+            $validated['location'] = $validated['address']; // Set location to same as address
+
+            // Handle checkbox fields - set to false if not present
+            $checkboxFields = [
+                'has_balcony', 'has_garden', 'has_pool', 'has_gym', 'has_security',
+                'has_elevator', 'has_air_conditioning', 'has_heating', 'has_internet',
+                'has_cable_tv', 'pets_allowed', 'smoking_allowed'
+            ];
+
+            foreach ($checkboxFields as $field) {
+                $validated[$field] = $request->has($field) ? (bool) $request->input($field) : false;
+            }
+
+            $property = Property::create($validated);
+
+            // Handle image uploads
+            if ($request->hasFile('images')) {
+                foreach ($request->file('images') as $index => $file) {
+                    if ($file && $file->isValid() && $file->getSize() > 0) {
+                        try {
+                            $filename = time() . '_' . $index . '.' . $file->getClientOriginalExtension();
+                            $path = $file->storeAs('properties/' . $property->id, $filename, 'public');
+                            
+                            $imageType = $request->input("image_types.{$index}", 'interior');
+
+                            Image::create([
+                                'property_id' => $property->id,
+                                'filename' => $filename,
+                                'path' => $path,
+                                'image_path' => $path,
+                                'image_type' => $imageType,
+                                'is_primary' => $index === 0,
+                                'image_order' => $index,
+                                'sort_order' => $index,
+                            ]);
+                        } catch (\Exception $e) {
+                            \Log::error('Image upload failed: ' . $e->getMessage());
+                            // Continue with other images even if one fails
+                        }
+                    }
+                }
+            }
+
+            // Handle blueprint uploads
+            if ($request->hasFile('blueprints')) {
+                foreach ($request->file('blueprints') as $index => $file) {
+                    $filename = time() . '_blueprint_' . $index . '.' . $file->getClientOriginalExtension();
+                    $path = $file->storeAs('properties/' . $property->id, $filename, 'public');
+
+                    Image::create([
+                        'property_id' => $property->id,
+                        'filename' => $filename,
+                        'path' => $path,
+                        'image_path' => $path,
+                        'image_type' => 'blueprint',
+                        'is_primary' => false,
+                        'image_order' => 0,
+                        'sort_order' => 0,
+                    ]);
+                }
+            }
+
+            // Cache nearby amenities for this property
+            if ($property->hasCoordinates()) {
+                $locationService = new LocationService();
+                $locationService->cachePropertyAmenities($property);
+            }
+
+            return redirect()->route('properties.index')
+                            ->with('success', 'Property created successfully! Waiting for admin approval.');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                            ->withInput()
+                            ->with('error', 'Error creating property: ' . $e->getMessage());
+        }
+    }
+
+    public function edit(Property $property)
+    {
+        // Only property owner or admin can edit
+        if (!Auth::user()->isAdmin() && $property->landlord_id !== Auth::id()) {
+            abort(403);
+        }
+
+        return view('properties.edit', compact('property'));
+    }
+
+    public function update(Request $request, Property $property)
+    {
+        if (!Auth::user()->isAdmin() && $property->landlord_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'price' => 'required|numeric|min:0',
+            'location' => 'required|string|max:255',
+            'bedrooms' => 'required|integer|min:1',
+            'bathrooms' => 'required|integer|min:1',
+            'type' => 'required|string|in:house,apartment,studio,condo,villa,townhouse',
+            'area' => 'nullable|numeric|min:0',
+            'parking_spaces' => 'nullable|integer|min:0',
+            'furnishing_status' => 'nullable|string|in:furnished,semi_furnished,unfurnished',
+            'has_balcony' => 'boolean',
+            'has_garden' => 'boolean',
+            'has_pool' => 'boolean',
+            'has_gym' => 'boolean',
+            'has_security' => 'boolean',
+            'has_elevator' => 'boolean',
+            'has_air_conditioning' => 'boolean',
+            'has_heating' => 'boolean',
+            'has_internet' => 'boolean',
+            'has_cable_tv' => 'boolean',
+            'pets_allowed' => 'boolean',
+            'smoking_allowed' => 'boolean',
+            'is_available' => 'sometimes|boolean',
+        ]);
+
+        if (Auth::user()->isAdmin()) {
+            $validated['status'] = $request->input('status', $property->status);
+        }
+
+        // Handle checkbox fields - set to false if not present
+        $checkboxFields = [
+            'has_balcony', 'has_garden', 'has_pool', 'has_gym', 'has_security',
+            'has_elevator', 'has_air_conditioning', 'has_heating', 'has_internet',
+            'has_cable_tv', 'pets_allowed', 'smoking_allowed'
+        ];
+
+        foreach ($checkboxFields as $field) {
+            $validated[$field] = $request->has($field) ? (bool) $request->input($field) : false;
+        }
+
+        $property->update($validated);
+
+        // Handle new image uploads
+        if ($request->hasFile('new_images')) {
+            $request->validate([
+                'new_images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
+            ]);
+
+            foreach ($request->file('new_images') as $index => $file) {
+                $filename = time() . '_' . $index . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('properties/' . $property->id, $filename, 'public');
+
+                Image::create([
+                    'property_id' => $property->id,
+                    'filename' => $filename,
+                    'path' => $path,
+                    'is_primary' => false, // New images are not primary by default
+                    'sort_order' => $property->images()->count() + $index,
+                ]);
+            }
+        }
+
+        return redirect()->route('properties.index')
+                        ->with('success', 'Property updated successfully!');
+    }
+
+    public function destroy(Property $property)
+    {
+        if (!Auth::user()->isAdmin() && $property->landlord_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $property->delete();
+
+        return redirect()->route('properties.index')
+                        ->with('success', 'Property deleted successfully!');
+    }
+}
