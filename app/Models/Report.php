@@ -35,6 +35,8 @@ class Report extends Model
             'evidence_urls' => 'array',
             'resolution_actions' => 'array',
             'resolved_at' => 'datetime',
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
         ];
     }
 
@@ -62,6 +64,27 @@ class Report extends Model
             return is_array($decoded) ? $decoded : [];
         }
         return is_array($value) ? $value : [];
+    }
+
+    /**
+     * Get the resolved_at attribute.
+     * Ensure it's always returned as a Carbon instance.
+     */
+    public function getResolvedAtAttribute($value)
+    {
+        if (is_null($value)) {
+            return null;
+        }
+        
+        if ($value instanceof \Carbon\Carbon) {
+            return $value;
+        }
+        
+        try {
+            return \Carbon\Carbon::parse($value);
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 
     /**
