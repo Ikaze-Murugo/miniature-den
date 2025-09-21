@@ -1,23 +1,9 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Murugo - Find Your Perfect Home in Rwanda</title>
-    <meta name="description" content="Discover thousands of rental properties across Rwanda. Connect with landlords, find your dream home, or list your property on Murugo.">
-    
-    <!-- Fonts - Anthropic Inspired -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Scripts -->
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
-</head>
-<body class="font-sans antialiased bg-white">
-    <!-- Navigation -->
-    @include('layouts.navigation')
+@extends('layouts.app')
+
+@section('title', 'Find Your Perfect Home in Rwanda')
+@section('description', 'Discover thousands of rental properties across Rwanda. Connect with landlords, find your dream home, or list your property on Murugo.')
+
+@section('content')
 
     <!-- Hero Section -->
     <section class="gradient-anthropic min-h-screen flex items-center relative overflow-hidden">
@@ -344,20 +330,18 @@
         </div>
     </section>
 
-    <!-- Footer -->
-    <x-footer />
+@endsection
 
-    <!-- Search Suggestions Script -->
-    <script>
-        // Simple search suggestions (can be enhanced later)
-        document.addEventListener('DOMContentLoaded', function() {
-            const locationInput = document.querySelector('input[name="location"]');
-            if (locationInput) {
-                locationInput.addEventListener('input', function(e) {
-                    // Add autocomplete functionality here
-                });
-            }
-        });
-    </script>
-</body>
-</html>
+@push('scripts')
+<script>
+    // Simple search suggestions (can be enhanced later)
+    document.addEventListener('DOMContentLoaded', function() {
+        const locationInput = document.querySelector('input[name="location"]');
+        if (locationInput) {
+            locationInput.addEventListener('input', function(e) {
+                // Add autocomplete functionality here
+            });
+        }
+    });
+</script>
+@endpush
