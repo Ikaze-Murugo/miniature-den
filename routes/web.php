@@ -14,6 +14,9 @@ use App\Http\Controllers\PublicController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\EmailPreferenceController;
 use App\Http\Controllers\HomepageController;
+use App\Http\Controllers\LegalController;
+use App\Http\Controllers\TeamController;
+use App\Http\Controllers\BlogController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes (no authentication required)
@@ -25,11 +28,33 @@ Route::get('/homepage/search-suggestions', [HomepageController::class, 'getSearc
 // Legacy public routes (keeping for backward compatibility)
 Route::get('/legacy', [PublicController::class, 'index'])->name('public.home');
 Route::get('/listings', [PublicController::class, 'properties'])->name('public.properties');
-Route::get('/listings/{property}', [PublicController::class, 'show'])->name('public.property.show');
+// Route::get('/listings/{property}', [PublicController::class, 'show'])->name('public.property.show'); // Commented out due to conflict
 Route::get('/browse', [SearchController::class, 'index'])->name('public.search');
 
 // Unsubscribe route (no auth required)
 Route::get('/unsubscribe/{user}', [EmailPreferenceController::class, 'unsubscribe'])->name('email.unsubscribe');
+
+// Legal pages (no auth required)
+Route::get('/terms', [LegalController::class, 'terms'])->name('legal.terms');
+Route::get('/privacy', [LegalController::class, 'privacy'])->name('legal.privacy');
+Route::get('/cookies', [LegalController::class, 'cookies'])->name('legal.cookies');
+
+// Team pages (no auth required)
+Route::get('/team', [TeamController::class, 'index'])->name('team.index');
+Route::get('/team/{id}', [TeamController::class, 'show'])->name('team.show');
+
+// Blog pages (no auth required)
+Route::get('/blog', [BlogController::class, 'index'])->name('blog.index');
+Route::get('/blog/{slug}', [BlogController::class, 'show'])->name('blog.show');
+Route::get('/blog/category/{slug}', [BlogController::class, 'category'])->name('blog.category');
+
+// Public Properties pages (no auth required)
+Route::get('/listings', [App\Http\Controllers\PublicPropertiesController::class, 'index'])->name('properties.public.index');
+Route::get('/listings/search', [App\Http\Controllers\PublicPropertiesController::class, 'search'])->name('properties.public.search');
+Route::get('/listings-map', [App\Http\Controllers\PublicPropertiesController::class, 'map'])->name('properties.public.map');
+Route::get('/listings/{id}', [App\Http\Controllers\PublicPropertiesController::class, 'show'])->name('properties.public.show');
+Route::get('/api/properties/suggestions', [App\Http\Controllers\PublicPropertiesController::class, 'getSuggestions'])->name('properties.suggestions');
+
 
 // Search and comparison routes
 Route::get('/search/suggestions', [SearchController::class, 'getSuggestions'])->name('search.suggestions');

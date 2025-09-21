@@ -16,7 +16,7 @@
     </head>
     <body class="font-sans antialiased">
         <div class="min-h-screen bg-gray-100">
-            @include('layouts.navigation')
+            @include('layouts.simple-navigation')
 
             <!-- Page Heading -->
             @if (isset($header))
@@ -46,8 +46,11 @@
                     </div>
                 @endif
 
-                {{ $slot }}
+                @yield('content')
             </main>
+
+            <!-- Footer -->
+            <x-footer />
         </div>
     </body>
 </html>

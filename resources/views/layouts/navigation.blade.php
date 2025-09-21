@@ -8,7 +8,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
                     </svg>
                 </button>
-                <a href="{{ route('properties.index') }}" class="text-xl font-bold text-blue-600">
+                <a href="{{ route('home') }}" class="text-xl font-bold text-blue-600">
                     Murugo
                 </a>
             </div>
@@ -16,8 +16,12 @@
                 <!-- Notification Bell -->
                 @auth
                     @php
-                        $unreadCount = auth()->user()->unreadReportNotifications()->count() + 
-                                      auth()->user()->unreadMessageReportNotifications()->count();
+                        try {
+                            $unreadCount = auth()->user()->unreadReportNotifications()->count() + 
+                                          auth()->user()->unreadMessageReportNotifications()->count();
+                        } catch (Exception $e) {
+                            $unreadCount = 0;
+                        }
                     @endphp
                     <button class="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors">
                         <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -68,8 +72,17 @@
         <!-- Mobile Menu -->
         <div x-show="mobileMenuOpen" x-transition class="bg-white border-t border-gray-200">
             <div class="px-4 py-2 space-y-1">
+                <a href="{{ route('home') }}" class="nav-link {{ request()->routeIs('home') ? 'nav-link-active' : 'nav-link-inactive' }} block">
+                    Home
+                </a>
                 <a href="{{ route('properties.index') }}" class="nav-link {{ request()->routeIs('properties.index') ? 'nav-link-active' : 'nav-link-inactive' }} block">
                     Properties
+                </a>
+                <a href="{{ route('blog.index') }}" class="nav-link {{ request()->routeIs('blog.*') ? 'nav-link-active' : 'nav-link-inactive' }} block">
+                    Blog
+                </a>
+                <a href="{{ route('team.index') }}" class="nav-link {{ request()->routeIs('team.*') ? 'nav-link-active' : 'nav-link-inactive' }} block">
+                    Team
                 </a>
                 @auth
                     @if(auth()->user()->isRenter())
@@ -91,8 +104,12 @@
                     <a href="{{ route('reports.my-reports') }}" class="nav-link {{ request()->routeIs('reports.*') ? 'nav-link-active' : 'nav-link-inactive' }} block">
                         My Reports
                         @php
-                            $unreadCount = auth()->user()->unreadReportNotifications()->count() + 
-                                          auth()->user()->unreadMessageReportNotifications()->count();
+                            try {
+                                $unreadCount = auth()->user()->unreadReportNotifications()->count() + 
+                                              auth()->user()->unreadMessageReportNotifications()->count();
+                            } catch (Exception $e) {
+                                $unreadCount = 0;
+                            }
                         @endphp
                         @if($unreadCount > 0)
                             <span class="ml-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">{{ $unreadCount }}</span>
@@ -117,16 +134,25 @@
                 <div class="flex">
                     <!-- Logo -->
                     <div class="shrink-0 flex items-center">
-                        <a href="{{ route('properties.index') }}">
-                            <x-application-logo class="block h-9 w-auto fill-current text-gray-800" />
+                        <a href="{{ route('home') }}" class="text-xl font-bold text-blue-600">
+                            Murugo
                         </a>
                     </div>
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('properties.index')" :active="request()->routeIs('properties.index')">
-                        {{ __('Properties') }}
-                    </x-nav-link>
+                    <a href="{{ route('home') }}" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                        Home
+                    </a>
+                    <a href="{{ route('properties.index') }}" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                        Properties
+                    </a>
+                    <a href="{{ route('blog.index') }}" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                        Blog
+                    </a>
+                    <a href="{{ route('team.index') }}" class="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+                        Team
+                    </a>
                     
                     @auth
                         @if(auth()->user()->isRenter())
@@ -152,8 +178,12 @@
                     <div class="flex items-center space-x-2">
                         <span>{{ __('My Reports') }}</span>
                         @php
-                            $unreadCount = auth()->user()->unreadReportNotifications()->count() + 
-                                          auth()->user()->unreadMessageReportNotifications()->count();
+                            try {
+                                $unreadCount = auth()->user()->unreadReportNotifications()->count() + 
+                                              auth()->user()->unreadMessageReportNotifications()->count();
+                            } catch (Exception $e) {
+                                $unreadCount = 0;
+                            }
                         @endphp
                         @if($unreadCount > 0)
                         <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
