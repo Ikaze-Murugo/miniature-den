@@ -6,9 +6,9 @@
 @section('content')
 
     <!-- Hero Section -->
-    <section class="gradient-anthropic min-h-screen flex items-center relative overflow-hidden">
-        <div class="absolute inset-0 bg-black opacity-10"></div>
-        <div class="container-anthropic relative z-10">
+    <section class="min-h-screen flex items-center relative overflow-hidden bg-slate-900">
+        <div class="absolute inset-0 bg-slate-800 opacity-50"></div>
+        <div class="container relative z-10">
             <div class="text-center text-white">
                 <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
                     Find Your Perfect Home in 
@@ -21,23 +21,23 @@
                 
                 <!-- Hero Search Form -->
                 <div class="max-w-4xl mx-auto">
-                    <div class="anthropic-card p-8">
+                    <div class="card p-8 bg-white/95 backdrop-blur-sm">
                         <form action="{{ route('homepage.search') }}" method="GET" class="space-y-4">
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <!-- Location Search -->
                                 <div class="md:col-span-2">
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                                    <label class="form-label">Location</label>
                                     <input type="text" 
                                            name="location" 
                                            placeholder="Enter city, district, or neighborhood"
-                                           class="input-anthropic"
+                                           class="form-input"
                                            value="{{ request('location') }}">
                                 </div>
                                 
                                 <!-- Property Type -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
-                                    <select name="property_type" class="input-anthropic">
+                                    <label class="form-label">Property Type</label>
+                                    <select name="property_type" class="form-input">
                                         <option value="">Any Type</option>
                                         <option value="house" {{ request('property_type') == 'house' ? 'selected' : '' }}>House</option>
                                         <option value="apartment" {{ request('property_type') == 'apartment' ? 'selected' : '' }}>Apartment</option>
@@ -49,8 +49,8 @@
                                 
                                 <!-- Price Range -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Max Price</label>
-                                    <select name="max_price" class="input-anthropic">
+                                    <label class="form-label">Max Price</label>
+                                    <select name="max_price" class="form-input">
                                         <option value="">Any Price</option>
                                         <option value="50000" {{ request('max_price') == '50000' ? 'selected' : '' }}>RWF 50,000</option>
                                         <option value="100000" {{ request('max_price') == '100000' ? 'selected' : '' }}>RWF 100,000</option>
@@ -61,24 +61,24 @@
                                 </div>
                             </div>
                             
-                            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                                <button type="submit" class="btn-anthropic px-8 py-3 text-lg">
-                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                                    </svg>
-                                    Search Properties
-                                </button>
-                                <a href="{{ route('properties.search-map') }}" class="btn-anthropic-secondary px-8 py-3 text-lg">
-                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    </svg>
-                                    Map Search
-                                </a>
-                                <a href="{{ route('register') }}" class="btn-anthropic-outline px-8 py-3 text-lg">
-                                    List Your Property
-                                </a>
-                            </div>
+                                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                        </svg>
+                                        Search Properties
+                                    </button>
+                                    <a href="{{ route('properties.search-map') }}" class="btn btn-secondary btn-lg">
+                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                        </svg>
+                                        Map Search
+                                    </a>
+                                    <a href="{{ route('register') }}" class="btn btn-outline btn-lg">
+                                        List Your Property
+                                    </a>
+                                </div>
                         </form>
                     </div>
                 </div>
@@ -86,15 +86,15 @@
         </div>
     </section>
 
-    <!-- Market Statistics Section -->
-    <section class="section-anthropic bg-gray-50">
-        <div class="container-anthropic">
-            <div class="text-center mb-12">
-                <h2 class="text-anthropic-heading mb-4">Rwanda's Leading Property Platform</h2>
-                <p class="text-anthropic-subheading max-w-2xl mx-auto">
-                    Join thousands of satisfied users who have found their perfect home through Murugo
-                </p>
-            </div>
+        <!-- Market Statistics Section -->
+        <section class="section bg-gray-50">
+            <div class="container">
+                <div class="text-center mb-12">
+                    <h2 class="text-heading-2 mb-4">Rwanda's Leading Property Platform</h2>
+                    <p class="text-body-lg max-w-2xl mx-auto">
+                        Join thousands of satisfied users who have found their perfect home through Murugo
+                    </p>
+                </div>
             
             <div class="grid grid-cols-2 md:grid-cols-5 gap-8">
                 <div class="text-center">
@@ -121,24 +121,24 @@
         </div>
     </section>
 
-    <!-- Featured Properties Section -->
-    <section class="section-anthropic">
-        <div class="container-anthropic">
-            <div class="text-center mb-12">
-                <h2 class="text-anthropic-heading mb-4">Featured Properties</h2>
-                <p class="text-anthropic-subheading max-w-2xl mx-auto">
-                    Handpicked premium properties in the best locations across Rwanda
-                </p>
-            </div>
+        <!-- Featured Properties Section -->
+        <section class="section">
+            <div class="container">
+                <div class="text-center mb-12">
+                    <h2 class="text-heading-2 mb-4">Featured Properties</h2>
+                    <p class="text-body-lg max-w-2xl mx-auto">
+                        Handpicked premium properties in the best locations across Rwanda
+                    </p>
+                </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                @forelse($featuredProperties as $property)
-                    <div class="anthropic-card group cursor-pointer">
-                        <div class="relative overflow-hidden rounded-t-xl">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    @forelse($featuredProperties as $property)
+                        <div class="property-card group cursor-pointer">
+                            <div class="relative overflow-hidden rounded-t-xl">
                             @if($property->images->count() > 0)
                                 <img src="{{ Storage::url($property->images->first()->path) }}" 
                                      alt="{{ $property->title }}"
-                                     class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
+                                     class="property-card-image">
                             @else
                                 <div class="w-full h-48 bg-gray-200 flex items-center justify-center">
                                     <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -170,10 +170,10 @@
                                 @endif
                             </div>
                             
-                            <a href="{{ route('properties.show', $property) }}" 
-                               class="btn-anthropic w-full text-center">
-                                View Details
-                            </a>
+                                <a href="{{ route('properties.show', $property) }}" 
+                                   class="btn btn-primary w-full text-center">
+                                    View Details
+                                </a>
                         </div>
                     </div>
                 @empty
@@ -183,21 +183,21 @@
                 @endforelse
             </div>
             
-            <div class="text-center mt-12">
-                <a href="{{ route('properties.index') }}" class="btn-anthropic-secondary px-8 py-3">
-                    View All Properties
-                </a>
-            </div>
+                <div class="text-center mt-12">
+                    <a href="{{ route('properties.index') }}" class="btn btn-secondary">
+                        View All Properties
+                    </a>
+                </div>
         </div>
     </section>
 
-    <!-- For Landlords Section -->
-    <section class="section-anthropic gradient-anthropic-subtle">
-        <div class="container-anthropic">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-                <div>
-                    <h2 class="text-anthropic-heading mb-6">For Property Owners</h2>
-                    <p class="text-anthropic-body mb-6">
+        <!-- For Landlords Section -->
+        <section class="section bg-gray-50">
+            <div class="container">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h2 class="text-heading-2 mb-6">For Property Owners</h2>
+                        <p class="text-body mb-6">
                         Join thousands of successful landlords who trust Murugo to help them find quality tenants 
                         and maximize their rental income. Our platform provides all the tools you need to manage 
                         your properties effectively.
@@ -241,18 +241,18 @@
                         </div>
                     </div>
                     
-                    <div class="flex flex-col sm:flex-row gap-4">
-                        <a href="{{ route('register') }}" class="btn-anthropic px-6 py-3">
-                            List Your Property
-                        </a>
-                        <a href="#" class="btn-anthropic-secondary px-6 py-3">
-                            Learn More
-                        </a>
-                    </div>
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <a href="{{ route('register') }}" class="btn btn-primary">
+                                List Your Property
+                            </a>
+                            <a href="#" class="btn btn-secondary">
+                                Learn More
+                            </a>
+                        </div>
                 </div>
                 
                 <div class="relative">
-                    <div class="anthropic-card p-8">
+                    <div class="card p-8">
                         <h3 class="text-xl font-semibold mb-4">Success Story</h3>
                         <blockquote class="text-gray-600 mb-4">
                             "Murugo helped me find the perfect tenant for my apartment in just 2 weeks. 
@@ -273,19 +273,19 @@
         </div>
     </section>
 
-    <!-- Testimonials Section -->
-    <section class="section-anthropic">
-        <div class="container-anthropic">
-            <div class="text-center mb-12">
-                <h2 class="text-anthropic-heading mb-4">What Our Users Say</h2>
-                <p class="text-anthropic-subheading max-w-2xl mx-auto">
-                    Don't just take our word for it. Here's what our community has to say about Murugo.
-                </p>
-            </div>
+        <!-- Testimonials Section -->
+        <section class="section">
+            <div class="container">
+                <div class="text-center mb-12">
+                    <h2 class="text-heading-2 mb-4">What Our Users Say</h2>
+                    <p class="text-body-lg max-w-2xl mx-auto">
+                        Don't just take our word for it. Here's what our community has to say about Murugo.
+                    </p>
+                </div>
             
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                @foreach($testimonials as $testimonial)
-                    <div class="anthropic-card p-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    @foreach($testimonials as $testimonial)
+                        <div class="card p-6">
                         <div class="flex items-center mb-4">
                             @for($i = 0; $i < $testimonial['rating']; $i++)
                                 <svg class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
@@ -311,24 +311,24 @@
         </div>
     </section>
 
-    <!-- CTA Section -->
-    <section class="section-anthropic gradient-anthropic">
-        <div class="container-anthropic text-center text-white">
-            <h2 class="text-4xl font-bold mb-4">Ready to Find Your Perfect Home?</h2>
-            <p class="text-xl mb-8 text-gray-100 max-w-2xl mx-auto">
-                Join thousands of satisfied users who have found their dream home through Murugo. 
-                Start your search today!
-            </p>
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="{{ route('register') }}" class="bg-white text-primary-600 px-8 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors">
-                    Get Started Free
-                </a>
-                <a href="{{ route('properties.index') }}" class="border-2 border-white text-white px-8 py-3 rounded-lg font-medium hover:bg-white hover:text-primary-600 transition-colors">
-                    Browse Properties
-                </a>
+        <!-- CTA Section -->
+        <section class="section bg-slate-900">
+            <div class="container text-center text-white">
+                <h2 class="text-4xl font-bold mb-4">Ready to Find Your Perfect Home?</h2>
+                <p class="text-xl mb-8 text-gray-100 max-w-2xl mx-auto">
+                    Join thousands of satisfied users who have found their dream home through Murugo. 
+                    Start your search today!
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <a href="{{ route('register') }}" class="btn btn-primary bg-white text-slate-900 hover:bg-gray-100">
+                        Get Started Free
+                    </a>
+                    <a href="{{ route('properties.index') }}" class="btn btn-outline border-white text-white hover:bg-white hover:text-slate-900">
+                        Browse Properties
+                    </a>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
 
 @endsection
 

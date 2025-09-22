@@ -5,11 +5,11 @@
 @section('content')
 <div class="min-h-screen bg-gray-50">
     <!-- Hero Section -->
-    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="bg-slate-900 text-white">
+        <div class="container py-16">
             <div class="text-center">
-                <h1 class="text-4xl md:text-5xl font-bold mb-6">Real Estate Blog</h1>
-                <p class="text-xl md:text-2xl text-indigo-100 max-w-3xl mx-auto">
+                <h1 class="text-heading-1 mb-6">Real Estate Blog</h1>
+                <p class="text-body-lg text-gray-100 max-w-3xl mx-auto">
                     Stay informed with the latest market trends, property tips, and investment insights
                 </p>
             </div>
@@ -18,7 +18,7 @@
 
     <!-- Search and Filter Section -->
     <div class="bg-white border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="container py-8">
             <div class="flex flex-col md:flex-row gap-4">
                 <!-- Search -->
                 <div class="flex-1">
@@ -27,12 +27,7 @@
                                name="search" 
                                value="{{ $searchQuery }}"
                                placeholder="Search articles..."
-                               class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
-                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                            </svg>
-                        </div>
+                               class="form-input input-search">
                     </form>
                 </div>
 
@@ -41,7 +36,7 @@
                     <form method="GET" action="{{ route('blog.index') }}">
                         <select name="category" 
                                 onchange="this.form.submit()"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                                class="form-input">
                             <option value="">All Categories</option>
                             @foreach($categories as $category)
                                 <option value="{{ $category['slug'] }}" 
@@ -58,12 +53,12 @@
 
     <!-- Featured Posts -->
     @if(!$selectedCategory && !$searchQuery)
-    <div class="py-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl font-bold text-gray-900 mb-8">Featured Articles</h2>
+    <div class="section">
+        <div class="container">
+            <h2 class="text-heading-2 mb-8">Featured Articles</h2>
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 @foreach($featuredPosts as $post)
-                <article class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                <article class="card hover:shadow-lg transition-shadow duration-300">
                     <div class="aspect-w-16 aspect-h-9">
                         <img class="w-full h-48 object-cover" 
                              src="{{ $post['image'] }}" 
@@ -72,7 +67,7 @@
                     </div>
                     <div class="p-6">
                         <div class="flex items-center mb-3">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                            <span class="badge badge-primary">
                                 {{ $post['category'] }}
                             </span>
                             <span class="ml-2 text-sm text-gray-500">{{ $post['read_time'] }}</span>
@@ -96,8 +91,8 @@
                                 </div>
                             </div>
                             <a href="{{ route('blog.show', 'rwanda-real-estate-market-outlook-2024') }}" 
-                               class="text-indigo-600 hover:text-indigo-500 font-medium">
-                                Read More →
+                               class="btn btn-outline btn-sm">
+                                Read More
                             </a>
                         </div>
                     </div>

@@ -5,32 +5,32 @@
 @section('content')
 <div class="min-h-screen bg-gray-50">
     <!-- Hero Section -->
-    <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="bg-slate-900 text-white">
+        <div class="container py-16">
             <div class="text-center">
-                <h1 class="text-4xl md:text-5xl font-bold mb-4">
+                <h1 class="text-heading-1 mb-4">
                     Find Your Perfect Home
                 </h1>
-                <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+                <p class="text-body-lg text-gray-100 mb-8 max-w-2xl mx-auto">
                     Discover thousands of rental properties across Rwanda. From cozy apartments to spacious houses, find your ideal home today.
                 </p>
                 
                 <!-- Quick Search Bar -->
                 <div class="max-w-4xl mx-auto">
-                    <form action="{{ route('properties.public.search') }}" method="GET" class="bg-white rounded-lg shadow-lg p-6">
+                    <form action="{{ route('properties.public.search') }}" method="GET" class="card p-6 bg-white/95 backdrop-blur-sm">
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                             <div class="md:col-span-2">
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                                <label class="form-label">Location</label>
                                 <input type="text" 
                                        name="search" 
                                        placeholder="Enter city, district, or neighborhood"
-                                       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                       class="form-input"
                                        value="{{ request('search') }}">
                             </div>
                             
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
-                                <select name="type" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <label class="form-label">Property Type</label>
+                                <select name="type" class="form-input">
                                     <option value="">Any Type</option>
                                     @foreach($filterOptions['types'] as $type)
                                         <option value="{{ $type }}" {{ request('type') == $type ? 'selected' : '' }}>
@@ -41,7 +41,7 @@
                             </div>
                             
                             <div class="flex items-end">
-                                <button type="submit" class="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                                <button type="submit" class="btn btn-primary w-full">
                                     Search Properties
                                 </button>
                             </div>
@@ -54,10 +54,10 @@
 
     <!-- Filters Section -->
     <div class="bg-white border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <div class="container py-6">
             <div class="flex flex-wrap items-center justify-between gap-4">
                 <!-- Filter Toggle -->
-                <button id="filterToggle" class="flex items-center space-x-2 text-gray-600 hover:text-gray-900">
+                <button id="filterToggle" class="btn btn-ghost flex items-center space-x-2">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"></path>
                     </svg>
@@ -66,12 +66,12 @@
 
                 <!-- View Toggle -->
                 <div class="flex items-center space-x-2">
-                    <button id="gridView" class="p-2 text-gray-400 hover:text-gray-600 active">
+                    <button id="gridView" class="btn btn-icon text-gray-400 hover:text-gray-600 active">
                         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
                             <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
                         </svg>
                     </button>
-                    <button id="listView" class="p-2 text-gray-400 hover:text-gray-600">
+                    <button id="listView" class="btn btn-icon text-gray-400 hover:text-gray-600">
                         <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 20 20">
                             <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd"></path>
                         </svg>
@@ -80,8 +80,8 @@
 
                 <!-- Sort Dropdown -->
                 <div class="flex items-center space-x-2">
-                    <label class="text-sm font-medium text-gray-700">Sort by:</label>
-                    <select id="sortSelect" class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <label class="form-label">Sort by:</label>
+                    <select id="sortSelect" class="form-input">
                         <option value="newest">Newest First</option>
                         <option value="price_low">Price: Low to High</option>
                         <option value="price_high">Price: High to Low</option>
@@ -97,21 +97,21 @@
                 <form action="{{ route('properties.public.search') }}" method="GET" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <!-- Price Range -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Price Range</label>
+                        <label class="form-label">Price Range</label>
                         <div class="space-y-2">
                             <input type="number" name="min_price" placeholder="Min Price" 
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   class="form-input"
                                    value="{{ request('min_price') }}">
                             <input type="number" name="max_price" placeholder="Max Price" 
-                                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                   class="form-input"
                                    value="{{ request('max_price') }}">
                         </div>
                     </div>
 
                     <!-- Bedrooms -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Bedrooms</label>
-                        <select name="bedrooms" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <label class="form-label">Bedrooms</label>
+                        <select name="bedrooms" class="form-input">
                             <option value="">Any</option>
                             <option value="1" {{ request('bedrooms') == '1' ? 'selected' : '' }}>1+</option>
                             <option value="2" {{ request('bedrooms') == '2' ? 'selected' : '' }}>2+</option>
@@ -123,8 +123,8 @@
 
                     <!-- Bathrooms -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Bathrooms</label>
-                        <select name="bathrooms" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <label class="form-label">Bathrooms</label>
+                        <select name="bathrooms" class="form-input">
                             <option value="">Any</option>
                             <option value="1" {{ request('bathrooms') == '1' ? 'selected' : '' }}>1+</option>
                             <option value="2" {{ request('bathrooms') == '2' ? 'selected' : '' }}>2+</option>
@@ -135,8 +135,8 @@
 
                     <!-- Furnishing Status -->
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Furnishing</label>
-                        <select name="furnishing_status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <label class="form-label">Furnishing</label>
+                        <select name="furnishing_status" class="form-input">
                             <option value="">Any</option>
                             @foreach($filterOptions['furnishing_statuses'] as $status)
                                 <option value="{{ $status }}" {{ request('furnishing_status') == $status ? 'selected' : '' }}>
@@ -148,7 +148,7 @@
 
                     <!-- Amenities -->
                     <div class="md:col-span-2 lg:col-span-4">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Amenities</label>
+                        <label class="form-label">Amenities</label>
                         <div class="grid grid-cols-2 md:grid-cols-4 gap-2">
                             @foreach($filterOptions['amenities'] as $amenity)
                                 <label class="flex items-center space-x-2">
@@ -163,10 +163,10 @@
 
                     <!-- Submit Button -->
                     <div class="md:col-span-2 lg:col-span-4 flex justify-end space-x-4">
-                        <a href="{{ route('properties.public.index') }}" class="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors">
+                        <a href="{{ route('properties.public.index') }}" class="btn btn-outline">
                             Clear Filters
                         </a>
-                        <button type="submit" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        <button type="submit" class="btn btn-primary">
                             Apply Filters
                         </button>
                     </div>
@@ -176,22 +176,22 @@
     </div>
 
     <!-- Properties Grid -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="container py-8">
         <!-- Results Header -->
         <div class="flex items-center justify-between mb-6">
             <div>
-                <h2 class="text-2xl font-bold text-gray-900">
+                <h2 class="text-heading-2">
                     {{ $properties->total() }} Properties Found
                 </h2>
                 @if(request()->hasAny(['search', 'type', 'min_price', 'max_price', 'bedrooms', 'bathrooms']))
-                    <p class="text-gray-600 mt-1">
+                    <p class="text-body mt-1">
                         Showing results for your search criteria
                     </p>
                 @endif
             </div>
             
             <div class="flex items-center space-x-4">
-                <a href="{{ route('properties.public.map') }}" class="flex items-center space-x-2 text-blue-600 hover:text-blue-700">
+                <a href="{{ route('properties.public.map') }}" class="btn btn-outline flex items-center space-x-2">
                     <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
@@ -205,13 +205,13 @@
             <!-- Properties Grid -->
             <div id="propertiesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 @foreach($properties as $property)
-                    <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                    <div class="property-card group cursor-pointer">
                         <!-- Property Image -->
                         <div class="relative h-48 bg-gray-200">
                             @if($property->images->count() > 0)
                                         <img src="{{ asset('storage/' . $property->images->first()->path) }}" 
                                              alt="{{ $property->title }}"
-                                             class="w-full h-full object-cover">
+                                             class="property-card-image">
                             @else
                                 <div class="w-full h-full flex items-center justify-center text-gray-400">
                                     <svg class="h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -223,13 +223,13 @@
                             
                             <!-- Status Badge -->
                             <div class="absolute top-3 left-3">
-                                <span class="bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium">
+                                <span class="badge badge-success">
                                     Available
                                 </span>
                             </div>
                             
                             <!-- Favorite Button -->
-                            <button class="absolute top-3 right-3 p-2 bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors">
+                            <button class="absolute top-3 right-3 btn btn-icon bg-white rounded-full shadow-md hover:bg-gray-50 transition-colors">
                                 <svg class="h-5 w-5 text-gray-400 hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
                                 </svg>
@@ -267,11 +267,11 @@
                                         <span>{{ $property->area }}m²</span>
                                     @endif
                                 </div>
-                                <span class="capitalize">{{ $property->type }}</span>
+                                <span class="badge badge-primary capitalize">{{ $property->type }}</span>
                             </div>
                             
                             <a href="{{ route('properties.public.show', $property->id) }}" 
-                               class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-center block">
+                               class="btn btn-primary w-full text-center">
                                 View Details
                             </a>
                         </div>
@@ -294,7 +294,7 @@
                     Try adjusting your search criteria or browse all properties.
                 </p>
                 <div class="mt-6">
-                    <a href="{{ route('properties.public.index') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                    <a href="{{ route('properties.public.index') }}" class="btn btn-primary">
                         Browse All Properties
                     </a>
                 </div>

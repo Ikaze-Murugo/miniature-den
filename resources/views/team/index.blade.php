@@ -5,11 +5,11 @@
 @section('content')
 <div class="min-h-screen bg-gray-50">
     <!-- Hero Section -->
-    <div class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <div class="bg-slate-900 text-white">
+        <div class="container py-16">
             <div class="text-center">
-                <h1 class="text-4xl md:text-5xl font-bold mb-6">Meet Our Team</h1>
-                <p class="text-xl md:text-2xl text-indigo-100 max-w-3xl mx-auto">
+                <h1 class="text-heading-1 mb-6">Meet Our Team</h1>
+                <p class="text-body-lg text-gray-100 max-w-3xl mx-auto">
                     The passionate individuals behind Murugo, working to revolutionize real estate in Rwanda
                 </p>
             </div>
@@ -17,23 +17,23 @@
     </div>
 
     <!-- Company Stats -->
-    <div class="bg-white py-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="section bg-white">
+        <div class="container">
             <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
                 <div class="text-center">
-                    <div class="text-4xl font-bold text-indigo-600 mb-2">{{ number_format($companyStats['properties_listed']) }}+</div>
+                    <div class="text-4xl font-bold text-primary-600 mb-2">{{ number_format($companyStats['properties_listed']) }}+</div>
                     <div class="text-gray-600">Properties Listed</div>
                 </div>
                 <div class="text-center">
-                    <div class="text-4xl font-bold text-indigo-600 mb-2">{{ number_format($companyStats['happy_customers']) }}+</div>
+                    <div class="text-4xl font-bold text-primary-600 mb-2">{{ number_format($companyStats['happy_customers']) }}+</div>
                     <div class="text-gray-600">Happy Customers</div>
                 </div>
                 <div class="text-center">
-                    <div class="text-4xl font-bold text-indigo-600 mb-2">{{ $companyStats['cities_covered'] }}+</div>
+                    <div class="text-4xl font-bold text-primary-600 mb-2">{{ $companyStats['cities_covered'] }}+</div>
                     <div class="text-gray-600">Cities Covered</div>
                 </div>
                 <div class="text-center">
-                    <div class="text-4xl font-bold text-indigo-600 mb-2">{{ $companyStats['years_experience'] }}+</div>
+                    <div class="text-4xl font-bold text-primary-600 mb-2">{{ $companyStats['years_experience'] }}+</div>
                     <div class="text-gray-600">Years Experience</div>
                 </div>
             </div>
@@ -41,18 +41,18 @@
     </div>
 
     <!-- Team Members -->
-    <div class="py-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="section">
+        <div class="container">
             <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold text-gray-900 mb-4">Our Leadership Team</h2>
-                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                <h2 class="text-heading-2 mb-4">Our Leadership Team</h2>
+                <p class="text-body-lg max-w-2xl mx-auto">
                     Meet the dedicated professionals who are building the future of real estate in Rwanda
                 </p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 @foreach($teamMembers as $member)
-                <div class="bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
+                <div class="card hover:shadow-lg transition-shadow duration-300">
                     <div class="aspect-w-3 aspect-h-4">
                         <img class="w-full h-64 object-cover" 
                              src="{{ $member['image'] }}" 
@@ -61,7 +61,7 @@
                     </div>
                     <div class="p-6">
                         <h3 class="text-xl font-semibold text-gray-900 mb-2">{{ $member['name'] }}</h3>
-                        <p class="text-indigo-600 font-medium mb-3">{{ $member['position'] }}</p>
+                        <p class="text-primary-600 font-medium mb-3">{{ $member['position'] }}</p>
                         <p class="text-gray-600 text-sm mb-4">{{ Str::limit($member['bio'], 120) }}</p>
                         
                         <!-- Social Links -->
