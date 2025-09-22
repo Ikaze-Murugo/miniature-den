@@ -18,16 +18,17 @@ class PropertyController extends Controller
         
         if ($user->isAdmin()) {
             // Admin sees all properties
-            $properties = Property::with(['landlord', 'images'])->paginate(10);
+            $properties = Property::with(['landlord', 'images'])->paginate(12);
         } elseif ($user->isLandlord()) {
             // Landlord sees only their properties
-            $properties = Property::where('landlord_id', $user->id)->with(['landlord', 'images'])->paginate(10);
+            $properties = Property::where('landlord_id', $user->id)->with(['landlord', 'images'])->paginate(12);
         } else {
-            // Renters see only approved, available properties
+            // Everyone else (renters, guests) sees all approved, available properties
             $properties = Property::where('status', 'active')
                                 ->where('is_available', true)
                                 ->with(['landlord', 'images'])
-                                ->paginate(10);
+                                ->orderBy('created_at', 'desc')
+                                ->paginate(12);
         }
 
         return view('properties.index', compact('properties'));

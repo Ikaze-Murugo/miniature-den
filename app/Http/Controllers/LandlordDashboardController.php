@@ -35,12 +35,10 @@ class LandlordDashboardController extends Controller
             'average_rating' => $properties->avg(function($property) {
                 return $property->reviews->avg('rating');
             }),
-            'total_messages' => Message::whereHas('conversation', function($query) use ($user) {
-                $query->where('landlord_id', $user->id);
-            })->count(),
-            'unread_messages' => Message::whereHas('conversation', function($query) use ($user) {
-                $query->where('landlord_id', $user->id);
-            })->where('is_read', false)->count(),
+            'total_messages' => Message::where('sender_id', $user->id)
+                ->orWhere('recipient_id', $user->id)->count(),
+            'unread_messages' => Message::where('recipient_id', $user->id)
+                ->where('is_read', false)->count(),
             'reports_received' => Report::whereHas('property', function($query) use ($user) {
                 $query->where('landlord_id', $user->id);
             })->count(),
@@ -50,12 +48,12 @@ class LandlordDashboardController extends Controller
         ];
         
         // Recent activity
-        $recentMessages = Message::whereHas('conversation', function($query) use ($user) {
-            $query->where('landlord_id', $user->id);
-        })->with(['conversation.renter', 'sender'])
-          ->latest()
-          ->limit(5)
-          ->get();
+        $recentMessages = Message::where('sender_id', $user->id)
+            ->orWhere('recipient_id', $user->id)
+            ->with(['sender', 'recipient', 'property'])
+            ->latest()
+            ->limit(5)
+            ->get();
         
         $recentReviews = Review::whereHas('property', function($query) use ($user) {
             $query->where('landlord_id', $user->id);
@@ -78,9 +76,9 @@ class LandlordDashboardController extends Controller
             'views_this_month' => Property::where('landlord_id', $landlordId)
                 ->where('created_at', '>=', $thirtyDaysAgo)
                 ->sum('views_count'),
-            'new_messages_this_month' => Message::whereHas('conversation', function($query) use ($landlordId) {
-                $query->where('landlord_id', $landlordId);
-            })->where('created_at', '>=', $thirtyDaysAgo)->count(),
+            'new_messages_this_month' => Message::where('sender_id', $landlordId)
+                ->orWhere('recipient_id', $landlordId)
+                ->where('created_at', '>=', $thirtyDaysAgo)->count(),
             'new_reviews_this_month' => Review::whereHas('property', function($query) use ($landlordId) {
                 $query->where('landlord_id', $landlordId);
             })->where('created_at', '>=', $thirtyDaysAgo)->count(),

@@ -4,8 +4,8 @@
 @section('description', 'Discover thousands of rental properties across Rwanda. Connect with landlords, find your dream home, or list your property on Murugo.')
 
 @section('content')
-
-    <!-- Hero Section -->
+<div id="main-content">
+        <!-- Hero Section -->
     <section class="min-h-screen flex items-center relative overflow-hidden bg-slate-900">
         <div class="absolute inset-0 bg-slate-800 opacity-50"></div>
         <div class="container relative z-10">
@@ -330,9 +330,10 @@
             </div>
         </section>
 
-@endsection
+     </div>
+     @endsection
 
-@push('scripts')
+     @push('scripts')
 <script>
     // Simple search suggestions (can be enhanced later)
     document.addEventListener('DOMContentLoaded', function() {

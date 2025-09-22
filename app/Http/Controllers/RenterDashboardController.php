@@ -30,12 +30,10 @@ class RenterDashboardController extends Controller
         // Calculate statistics
         $stats = [
             'total_favorites' => Favorite::where('user_id', $user->id)->count(),
-            'total_messages' => Message::whereHas('conversation', function($query) use ($user) {
-                $query->where('renter_id', $user->id);
-            })->count(),
-            'unread_messages' => Message::whereHas('conversation', function($query) use ($user) {
-                $query->where('renter_id', $user->id);
-            })->where('is_read', false)->count(),
+            'total_messages' => Message::where('sender_id', $user->id)
+                ->orWhere('recipient_id', $user->id)->count(),
+            'unread_messages' => Message::where('recipient_id', $user->id)
+                ->where('is_read', false)->count(),
             'reports_submitted' => Report::where('user_id', $user->id)->count(),
             'message_reports_submitted' => MessageReport::where('user_id', $user->id)->count(),
             'pending_reports' => Report::where('user_id', $user->id)
@@ -45,12 +43,12 @@ class RenterDashboardController extends Controller
         ];
         
         // Recent activity
-        $recentMessages = Message::whereHas('conversation', function($query) use ($user) {
-            $query->where('renter_id', $user->id);
-        })->with(['conversation.landlord', 'sender'])
-          ->latest()
-          ->limit(5)
-          ->get();
+        $recentMessages = Message::where('sender_id', $user->id)
+            ->orWhere('recipient_id', $user->id)
+            ->with(['sender', 'recipient', 'property'])
+            ->latest()
+            ->limit(5)
+            ->get();
         
         $recentReports = Report::where('user_id', $user->id)
                               ->with('property')
