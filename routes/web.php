@@ -60,9 +60,8 @@ Route::get('/api/properties/suggestions', [App\Http\Controllers\PublicProperties
 Route::get('/search/suggestions', [SearchController::class, 'getSuggestions'])->name('search.suggestions');
 Route::get('/comparison', [SearchController::class, 'showComparison'])->name('comparison.show');
 
-Route::get('/dashboard', function () {
-    return redirect()->route('properties.index');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])->name('dashboard');
 
 // Email verification routes
 Route::middleware(['auth'])->group(function () {
@@ -95,6 +94,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/properties/create/enhanced', [PropertyController::class, 'createEnhanced'])->name('properties.create.enhanced');
     Route::get('/search', [SearchController::class, 'index'])->name('properties.search');
     Route::get('/search-map', [SearchController::class, 'searchMap'])->name('properties.search-map');
+    
+    // Dashboard routes
+    Route::get('/landlord/dashboard', [App\Http\Controllers\LandlordDashboardController::class, 'index'])->name('landlord.dashboard');
+    Route::get('/renter/dashboard', [App\Http\Controllers\RenterDashboardController::class, 'index'])->name('renter.dashboard');
     
     // Advanced search routes
     Route::post('/search/save', [SearchController::class, 'saveSearch'])->name('search.save');
