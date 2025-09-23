@@ -148,7 +148,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->middleware('rate_limit.messaging')
         ->name('messages.reply');
     
-    // Favorite routes
+    // Enhanced Property routes (comparison only - favorites already exist)
+    Route::post('/properties/{property}/compare', [PropertyController::class, 'addToComparison'])->name('properties.compare.add');
+    Route::delete('/properties/{property}/compare', [PropertyController::class, 'removeFromComparison'])->name('properties.compare.remove');
+    Route::get('/properties/compare', [PropertyController::class, 'compare'])->name('properties.compare');
+    
+    // Existing Favorite routes
     Route::get('/favorites', [FavoriteController::class, 'index'])->name('favorites.index');
     Route::post('/properties/{property}/favorite', [FavoriteController::class, 'store'])->name('favorites.store');
     Route::delete('/properties/{property}/favorite', [FavoriteController::class, 'destroy'])->name('favorites.destroy');

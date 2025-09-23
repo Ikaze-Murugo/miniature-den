@@ -15,7 +15,7 @@ class PublicPropertiesController extends Controller
     public function index(Request $request)
     {
         $query = Property::with(['images', 'nearbyAmenities', 'landlord'])
-            ->where('status', 'approved')
+            ->where('status', 'active')
             ->where('is_available', true);
 
         // Apply filters
@@ -46,7 +46,7 @@ class PublicPropertiesController extends Controller
     public function search(Request $request)
     {
         $query = Property::with(['images', 'nearbyAmenities', 'landlord'])
-            ->where('status', 'approved')
+            ->where('status', 'active')
             ->where('is_available', true);
 
         // Apply filters
@@ -77,7 +77,7 @@ class PublicPropertiesController extends Controller
     public function show($id)
     {
         $property = Property::with(['images', 'nearbyAmenities', 'landlord', 'reviews'])
-            ->where('status', 'approved')
+            ->where('status', 'active')
             ->findOrFail($id);
 
         // Increment view count
@@ -85,7 +85,7 @@ class PublicPropertiesController extends Controller
 
         // Get related properties
         $relatedProperties = Property::with(['images'])
-            ->where('status', 'approved')
+            ->where('status', 'active')
             ->where('is_available', true)
             ->where('id', '!=', $property->id)
             ->where(function($q) use ($property) {
@@ -105,7 +105,7 @@ class PublicPropertiesController extends Controller
     public function map(Request $request)
     {
         try {
-            $query = Property::where('status', 'approved')
+            $query = Property::where('status', 'active')
                 ->where('is_available', true)
                 ->whereNotNull('latitude')
                 ->whereNotNull('longitude');
@@ -132,7 +132,7 @@ class PublicPropertiesController extends Controller
         $suggestions = [];
 
         // Location suggestions
-        $locations = Property::where('status', 'approved')
+        $locations = Property::where('status', 'active')
             ->where(function($q) use ($search) {
                 $q->where('address', 'like', "%{$search}%")
                   ->orWhere('neighborhood', 'like', "%{$search}%");
@@ -153,7 +153,7 @@ class PublicPropertiesController extends Controller
         }
 
         // Property type suggestions
-        $types = Property::where('status', 'approved')
+        $types = Property::where('status', 'active')
             ->where('type', 'like', "%{$search}%")
             ->select('type')
             ->distinct()
@@ -281,13 +281,13 @@ class PublicPropertiesController extends Controller
     private function getFilterOptions()
     {
         return [
-            'types' => Property::where('status', 'approved')
+            'types' => Property::where('status', 'active')
                 ->select('type')
                 ->distinct()
                 ->orderBy('type')
                 ->pluck('type'),
             
-            'locations' => Property::where('status', 'approved')
+            'locations' => Property::where('status', 'active')
                 ->select('neighborhood')
                 ->distinct()
                 ->whereNotNull('neighborhood')
@@ -320,7 +320,7 @@ class PublicPropertiesController extends Controller
         $suggestions = [];
 
         // Location suggestions
-        $locations = Property::where('status', 'approved')
+        $locations = Property::where('status', 'active')
             ->where(function($q) use ($search) {
                 $q->where('address', 'like', "%{$search}%")
                   ->orWhere('neighborhood', 'like', "%{$search}%");

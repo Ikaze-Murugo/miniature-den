@@ -155,134 +155,17 @@
                     </div>
                 </div>
             @else
-                <!-- Modern Property Grid - Mobile Optimized -->
-                <div class="grid mobile-property-grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <!-- Enhanced Property Grid - Modern Webflow-inspired Design -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-items-center">
                     @foreach($properties as $property)
-                        <article class="property-card group cursor-pointer" 
-                                 onclick="window.location.href='{{ route('properties.show', $property) }}'"
-                                 role="button"
-                                 tabindex="0"
-                                 aria-label="View {{ $property->title }} property details"
-                                 onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='{{ route('properties.show', $property) }}'}">
-                            <!-- Property Image -->
-                            <div class="relative overflow-hidden rounded-t-xl">
-                                @if($property->images->count() > 0)
-                                    <img src="{{ Storage::url($property->images->first()->path) }}" 
-                                         alt="{{ $property->title }} property image"
-                                         class="property-card-image"
-                                         loading="lazy">
-                                @else
-                                    <div class="w-full h-48 bg-gray-200 flex items-center justify-center" role="img" aria-label="No property image available">
-                                        <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        </svg>
-                                    </div>
-                                @endif
-                                
-                                <!-- Price Badge -->
-                                <div class="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-semibold text-primary-600 shadow-sm" 
-                                     aria-label="Price: RWF {{ number_format($property->price) }}">
-                                    RWF {{ number_format($property->price) }}
-                                </div>
-                                
-                                <!-- Status Badge -->
-                                @if($property->status === 'active')
-                                    <div class="absolute top-4 left-4 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium" 
-                                         aria-label="Property is available">
-                                        Available
-                                    </div>
-                                @elseif($property->status === 'pending')
-                                    <div class="absolute top-4 left-4 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-medium" 
-                                         aria-label="Property is pending approval">
-                                        Pending
-                                    </div>
-                                @endif
-                            </div>
-                            
-                            <!-- Property Details -->
-                            <div class="p-6">
-                                <h3 class="text-xl font-semibold mb-2 text-gray-900 group-hover:text-primary-600 transition-colors">
-                                    {{ $property->title }}
-                                </h3>
-                                
-                                <p class="text-gray-600 mb-3 flex items-center">
-                                    <svg class="w-4 h-4 mr-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                    </svg>
-                                    {{ $property->location }}
-                                </p>
-                                
-                                <!-- Property Features -->
-                                <div class="flex items-center justify-between text-sm text-gray-500 mb-4">
-                                    <div class="flex items-center space-x-4">
-                                        <span class="flex items-center" aria-label="{{ $property->bedrooms }} bedrooms">
-                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
-                                            </svg>
-                                            {{ $property->bedrooms }} bed
-                                        </span>
-                                        <span class="flex items-center" aria-label="{{ $property->bathrooms }} bathrooms">
-                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M3 7v10a2 2 0 002 2h14a2 2 0 002-2V7"></path>
-                                            </svg>
-                                            {{ $property->bathrooms }} bath
-                                        </span>
-                                    </div>
-                                    @if($property->area)
-                                        <span class="flex items-center" aria-label="{{ $property->area }} square meters">
-                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
-                                            </svg>
-                                            {{ $property->area }} m²
-                                        </span>
-                                    @endif
-                                </div>
-                                
-                                <!-- Property Type -->
-                                <div class="mb-4">
-                                    <span class="badge badge-primary" aria-label="Property type: {{ ucfirst($property->type) }}">
-                                        {{ ucfirst($property->type) }}
-                                    </span>
-                                </div>
-                                
-                                <!-- Contact Button - Mobile Optimized -->
-                                <div class="pt-4 border-t border-gray-100">
-                                    @if(auth()->check() && auth()->user()->isRenter())
-                                        <a href="{{ route('messages.create', $property) }}" 
-                                           class="btn btn-primary mobile-contact-btn text-center"
-                                           onclick="event.stopPropagation()"
-                                           aria-label="Contact landlord about {{ $property->title }}">
-                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                                            </svg>
-                                            Contact Landlord
-                                        </a>
-                                    @elseif(!auth()->check())
-                                        <a href="{{ route('login') }}" 
-                                           class="btn btn-primary mobile-contact-btn text-center"
-                                           onclick="event.stopPropagation()"
-                                           aria-label="Login to contact landlord about {{ $property->title }}">
-                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path>
-                                            </svg>
-                                            Login to Contact
-                                        </a>
-                                    @else
-                                        <a href="{{ route('properties.show', $property) }}" 
-                                           class="btn btn-outline mobile-contact-btn text-center"
-                                           aria-label="View details for {{ $property->title }}">
-                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                            </svg>
-                                            View Details
-                                        </a>
-                                    @endif
-                                </div>
-                            </div>
-                        </article>
+                        <x-property-card 
+                            :property="$property"
+                            :show-carousel="true"
+                            :enable-favorites="auth()->check() && auth()->user()->isRenter()"
+                            :enable-comparison="auth()->check() && auth()->user()->isRenter()"
+                            :show-actions="true"
+                            class="w-full max-w-sm"
+                        />
                     @endforeach
                 </div>
 

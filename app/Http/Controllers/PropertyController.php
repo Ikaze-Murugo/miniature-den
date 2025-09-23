@@ -16,14 +16,14 @@ class PropertyController extends Controller
     {
         $user = Auth::user();
         
-        if ($user->isAdmin()) {
+        if ($user && $user->isAdmin()) {
             // Admin sees all properties
             $properties = Property::with(['landlord', 'images'])->paginate(12);
-        } elseif ($user->isLandlord()) {
+        } elseif ($user && $user->isLandlord()) {
             // Landlord sees only their properties
             $properties = Property::where('landlord_id', $user->id)->with(['landlord', 'images'])->paginate(12);
         } else {
-            // Everyone else (renters, guests) sees all approved, available properties
+            // Everyone else (renters, guests) sees all active, available properties
             $properties = Property::where('status', 'active')
                                 ->where('is_available', true)
                                 ->with(['landlord', 'images'])
@@ -307,5 +307,73 @@ class PropertyController extends Controller
 
         return redirect()->route('properties.index')
                         ->with('success', 'Property deleted successfully!');
+    }
+
+
+    /**
+     * Add property to comparison
+     */
+    public function addToComparison(Property $property)
+    {
+        if (!Auth::check()) {
+            return response()->json(['error' => 'Authentication required'], 401);
+        }
+
+        $user = Auth::user();
+        
+        if (!$user->isRenter()) {
+            return response()->json(['error' => 'Only renters can compare properties'], 403);
+        }
+
+        // Get current comparison from session
+        $comparison = session('property_comparison', []);
+        
+        // Add property if not already in comparison (max 3 properties)
+        if (!in_array($property->id, $comparison) && count($comparison) < 3) {
+            $comparison[] = $property->id;
+            session(['property_comparison' => $comparison]);
+            return response()->json(['added' => true, 'message' => 'Added to comparison']);
+        } elseif (in_array($property->id, $comparison)) {
+            return response()->json(['added' => false, 'message' => 'Property already in comparison']);
+        } else {
+            return response()->json(['added' => false, 'message' => 'Maximum 3 properties can be compared']);
+        }
+    }
+
+    /**
+     * Remove property from comparison
+     */
+    public function removeFromComparison(Property $property)
+    {
+        $comparison = session('property_comparison', []);
+        $comparison = array_values(array_filter($comparison, function($id) use ($property) {
+            return $id != $property->id;
+        }));
+        session(['property_comparison' => $comparison]);
+        
+        return response()->json(['removed' => true, 'message' => 'Removed from comparison']);
+    }
+
+    /**
+     * Show comparison page
+     */
+    public function compare()
+    {
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+
+        $user = Auth::user();
+        
+        if (!$user->isRenter()) {
+            abort(403, 'Only renters can compare properties');
+        }
+
+        $comparisonIds = session('property_comparison', []);
+        $properties = Property::whereIn('id', $comparisonIds)
+                             ->with(['images', 'landlord'])
+                             ->get();
+
+        return view('properties.compare', compact('properties'));
     }
 }
