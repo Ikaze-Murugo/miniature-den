@@ -8,12 +8,24 @@
     'class' => ''
 ])
 
+@php
+    // Determine the correct route based on user role and property ownership
+    $showRoute = 'properties.public.show';
+    if (auth()->check()) {
+        if (auth()->user()->isLandlord() && $property->landlord_id === auth()->id()) {
+            $showRoute = 'properties.show';
+        } elseif (auth()->user()->isAdmin()) {
+            $showRoute = 'properties.show';
+        }
+    }
+@endphp
+
 <article class="property-card-enhanced group cursor-pointer {{ $class }}" 
-         onclick="window.location.href='{{ route('properties.public.show', $property) }}'"
+         onclick="window.location.href='{{ route($showRoute, $property) }}'"
          role="button"
          tabindex="0"
          aria-label="View {{ $property->title }} property details"
-         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='{{ route('properties.public.show', $property) }}'}">
+         onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.location.href='{{ route($showRoute, $property) }}'}">
     
     <!-- Property Image Section with Carousel -->
     <div class="property-image-container relative overflow-hidden rounded-t-xl h-48">
@@ -81,15 +93,29 @@
         
         <!-- Status Badge -->
         @if($property->status === 'active')
-            <div class="absolute top-4 left-4 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium" 
-                 aria-label="Property is available">
-                Available
-            </div>
+            @if($property->version_status === 'original' && $property->hasPendingUpdates())
+                <div class="absolute top-4 left-4 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-medium" 
+                     aria-label="Property has pending updates">
+                    Pending Updates
+                </div>
+            @else
+                <div class="absolute top-4 left-4 bg-green-500 text-white px-2 py-1 rounded-full text-xs font-medium" 
+                     aria-label="Property is available">
+                    Available
+                </div>
+            @endif
         @elseif($property->status === 'pending')
-            <div class="absolute top-4 left-4 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-medium" 
-                 aria-label="Property is pending approval">
-                Pending
-            </div>
+            @if($property->version_status === 'pending_update')
+                <div class="absolute top-4 left-4 bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-medium" 
+                     aria-label="Property update pending approval">
+                    Update Pending
+                </div>
+            @else
+                <div class="absolute top-4 left-4 bg-yellow-500 text-white px-2 py-1 rounded-full text-xs font-medium" 
+                     aria-label="Property is pending approval">
+                    Pending
+                </div>
+            @endif
         @elseif($property->status === 'featured')
             <div class="absolute top-4 left-4 bg-blue-500 text-white px-2 py-1 rounded-full text-xs font-medium" 
                  aria-label="Featured property">

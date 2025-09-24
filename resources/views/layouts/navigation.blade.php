@@ -45,8 +45,17 @@
                         </x-slot>
                         
                         <x-slot name="content">
+                            <x-dropdown-link :href="route('profile.index')">
+                                {{ __('My Profile') }}
+                            </x-dropdown-link>
                             <x-dropdown-link :href="route('profile.edit')">
-                                {{ __('Profile') }}
+                                {{ __('Edit Profile') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('profile.settings')">
+                                {{ __('Settings') }}
+                            </x-dropdown-link>
+                            <x-dropdown-link :href="route('profile.statistics')">
+                                {{ __('Statistics') }}
                             </x-dropdown-link>
                             
                             <!-- Authentication -->
@@ -242,8 +251,17 @@
                             </x-slot>
 
                             <x-slot name="content">
+                                <x-dropdown-link :href="route('profile.index')">
+                                    {{ __('My Profile') }}
+                                </x-dropdown-link>
                                 <x-dropdown-link :href="route('profile.edit')">
-                                    {{ __('Profile') }}
+                                    {{ __('Edit Profile') }}
+                                </x-dropdown-link>
+                                <x-dropdown-link :href="route('profile.settings')">
+                                    {{ __('Settings') }}
+                                </x-dropdown-link>
+                                <x-dropdown-link :href="route('profile.statistics')">
+                                    {{ __('Statistics') }}
                                 </x-dropdown-link>
 
                                 <!-- Authentication -->

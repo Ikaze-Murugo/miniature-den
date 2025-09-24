@@ -57,7 +57,7 @@ class LandlordDashboardController extends Controller
         
         $recentReviews = Review::whereHas('property', function($query) use ($user) {
             $query->where('landlord_id', $user->id);
-        })->with(['property', 'renter'])
+        })->with(['property', 'user'])
           ->latest()
           ->limit(5)
           ->get();

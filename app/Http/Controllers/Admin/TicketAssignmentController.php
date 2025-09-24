@@ -189,14 +189,34 @@ class TicketAssignmentController extends Controller
             'total_assignments' => TicketAssignment::count(),
             'active_assignments' => TicketAssignment::active()->count(),
             'completed_assignments' => TicketAssignment::byStatus('completed')->count(),
-            'avg_resolution_time' => TicketAssignment::byStatus('completed')
-                                                   ->selectRaw('AVG(TIMESTAMPDIFF(HOUR, assigned_at, completed_at)) as avg_hours')
-                                                   ->value('avg_hours') ?? 0,
+            'avg_resolution_time' => $this->getAverageResolutionTime(),
             'assignments_by_priority' => TicketAssignment::selectRaw('priority, COUNT(*) as count')
                                                         ->groupBy('priority')
                                                         ->get(),
         ];
         
         return response()->json($stats);
+    }
+    
+    /**
+     * Get average resolution time (SQLite-compatible).
+     */
+    private function getAverageResolutionTime()
+    {
+        $assignments = TicketAssignment::byStatus('completed')
+                                    ->select('assigned_at', 'completed_at')
+                                    ->get();
+        
+        if ($assignments->isEmpty()) {
+            return 0;
+        }
+        
+        $totalHours = $assignments->sum(function ($assignment) {
+            $assigned = \Carbon\Carbon::parse($assignment->assigned_at);
+            $completed = \Carbon\Carbon::parse($assignment->completed_at);
+            return $assigned->diffInHours($completed);
+        });
+        
+        return round($totalHours / $assignments->count(), 2);
     }
 }

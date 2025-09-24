@@ -47,6 +47,16 @@ class Property extends Model
         'longitude',
         'address',
         'neighborhood',
+        // Versioning fields
+        'version',
+        'parent_property_id',
+        'version_status',
+        'last_approved_at',
+        'update_requested_at',
+        'update_notes',
+        'pending_changes',
+        'approved_by',
+        'update_requested_by',
     ];
 
     protected function casts(): array
@@ -76,12 +86,67 @@ class Property extends Model
             'rejected_at' => 'datetime',
             'latitude' => 'decimal:8',
             'longitude' => 'decimal:8',
+            // Versioning casts
+            'last_approved_at' => 'datetime',
+            'update_requested_at' => 'datetime',
+            'pending_changes' => 'array',
         ];
     }
 
     public function landlord()
     {
         return $this->belongsTo(User::class, 'landlord_id');
+    }
+
+    /**
+     * Get the admin who approved this property
+     */
+    public function approvedBy()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    /**
+     * Get the user who requested the update
+     */
+    public function updateRequestedBy()
+    {
+        return $this->belongsTo(User::class, 'update_requested_by');
+    }
+
+    /**
+     * Get the parent property (for versioned properties)
+     */
+    public function parentProperty()
+    {
+        return $this->belongsTo(Property::class, 'parent_property_id');
+    }
+
+    /**
+     * Get all versions of this property
+     */
+    public function versions()
+    {
+        return $this->hasMany(Property::class, 'parent_property_id')->orderBy('version');
+    }
+
+    /**
+     * Get the latest approved version of this property
+     */
+    public function latestApprovedVersion()
+    {
+        return $this->hasOne(Property::class, 'parent_property_id')
+                    ->where('version_status', 'approved_update')
+                    ->orderBy('version', 'desc');
+    }
+
+    /**
+     * Get pending updates for this property
+     */
+    public function pendingUpdates()
+    {
+        return $this->hasMany(Property::class, 'parent_property_id')
+                    ->where('version_status', 'pending_update');
     }
 
     public function images()
@@ -263,5 +328,142 @@ class Property extends Model
     public function scopeInNeighborhood($query, $neighborhood)
     {
         return $query->where('neighborhood', 'like', "%{$neighborhood}%");
+    }
+
+    /**
+     * Scope for original properties (not versions)
+     */
+    public function scopeOriginal($query)
+    {
+        return $query->where('version_status', 'original');
+    }
+
+    /**
+     * Scope for pending updates
+     */
+    public function scopePendingUpdates($query)
+    {
+        return $query->where('version_status', 'pending_update');
+    }
+
+    /**
+     * Scope for approved updates
+     */
+    public function scopeApprovedUpdates($query)
+    {
+        return $query->where('version_status', 'approved_update');
+    }
+
+    /**
+     * Check if this property has pending updates
+     */
+    public function hasPendingUpdates()
+    {
+        return $this->pendingUpdates()->exists();
+    }
+
+    /**
+     * Get the current approved version of this property
+     */
+    public function getCurrentApprovedVersion()
+    {
+        if ($this->version_status === 'original') {
+            return $this;
+        }
+
+        return $this->parentProperty()->with('latestApprovedVersion')->first()?->latestApprovedVersion ?? $this->parentProperty;
+    }
+
+    /**
+     * Check if this property is the current approved version
+     */
+    public function isCurrentApprovedVersion()
+    {
+        if ($this->version_status === 'original') {
+            return !$this->hasPendingUpdates();
+        }
+
+        return $this->version_status === 'approved_update' && 
+               $this->parentProperty && 
+               !$this->parentProperty->hasPendingUpdates();
+    }
+
+    /**
+     * Get the display version of this property (approved version or original)
+     */
+    public function getDisplayVersion()
+    {
+        if ($this->version_status === 'original' && !$this->hasPendingUpdates()) {
+            return $this;
+        }
+
+        if ($this->version_status === 'original' && $this->hasPendingUpdates()) {
+            return $this; // Show original while pending updates exist
+        }
+
+        if ($this->version_status === 'approved_update') {
+            return $this; // Show approved update
+        }
+
+        return $this->parentProperty ?? $this;
+    }
+
+    /**
+     * Create a new version of this property with pending changes
+     */
+    public function createPendingVersion($changes, $notes = null, $requestedBy = null)
+    {
+        $newVersion = $this->replicate();
+        $newVersion->version = $this->versions()->max('version') + 1;
+        $newVersion->parent_property_id = $this->id;
+        $newVersion->version_status = 'pending_update';
+        $newVersion->update_requested_at = now();
+        $newVersion->update_notes = $notes;
+        $newVersion->update_requested_by = $requestedBy ?? auth()->id();
+        $newVersion->pending_changes = $changes;
+        $newVersion->status = 'pending';
+        $newVersion->save();
+
+        return $newVersion;
+    }
+
+    /**
+     * Approve a pending update
+     */
+    public function approveUpdate($approvedBy = null)
+    {
+        if ($this->version_status !== 'pending_update') {
+            throw new \Exception('Only pending updates can be approved');
+        }
+
+        $this->version_status = 'approved_update';
+        $this->last_approved_at = now();
+        $this->approved_by = $approvedBy ?? auth()->id();
+        $this->status = 'active';
+        $this->save();
+
+        // Update the parent property to reflect the changes
+        if ($this->parentProperty) {
+            $this->parentProperty->update($this->pending_changes ?? []);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Reject a pending update
+     */
+    public function rejectUpdate($reason = null)
+    {
+        if ($this->version_status !== 'pending_update') {
+            throw new \Exception('Only pending updates can be rejected');
+        }
+
+        $this->status = 'rejected';
+        $this->rejection_reason = $reason;
+        $this->rejected_at = now();
+        $this->save();
+
+        return $this;
     }
 }

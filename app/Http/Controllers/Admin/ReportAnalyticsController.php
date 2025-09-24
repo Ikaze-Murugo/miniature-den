@@ -106,9 +106,22 @@ class ReportAnalyticsController extends Controller
      */
     private function getAverageResolutionTime()
     {
-        return Report::whereNotNull('resolved_at')
-                    ->selectRaw('AVG(TIMESTAMPDIFF(HOUR, created_at, resolved_at)) as avg_hours')
-                    ->value('avg_hours') ?? 0;
+        // SQLite-compatible version
+        $reports = Report::whereNotNull('resolved_at')
+                        ->select('created_at', 'resolved_at')
+                        ->get();
+        
+        if ($reports->isEmpty()) {
+            return 0;
+        }
+        
+        $totalHours = $reports->sum(function ($report) {
+            $created = \Carbon\Carbon::parse($report->created_at);
+            $resolved = \Carbon\Carbon::parse($report->resolved_at);
+            return $created->diffInHours($resolved);
+        });
+        
+        return round($totalHours / $reports->count(), 2);
     }
     
     /**
@@ -189,10 +202,7 @@ class ReportAnalyticsController extends Controller
             'priority_distribution' => Report::selectRaw('priority, COUNT(*) as count')
                                            ->groupBy('priority')
                                            ->get(),
-            'resolution_times' => Report::selectRaw('category, AVG(TIMESTAMPDIFF(HOUR, created_at, resolved_at)) as avg_hours')
-                                       ->whereNotNull('resolved_at')
-                                       ->groupBy('category')
-                                       ->get(),
+            'resolution_times' => $this->getResolutionTimesByCategory(),
         ];
         
         AnalyticsCache::store("analytics_reports_{$days}", $data, 60);
@@ -228,9 +238,7 @@ class ReportAnalyticsController extends Controller
                 'total_assignments' => TicketAssignment::count(),
                 'active_assignments' => TicketAssignment::active()->count(),
                 'completed_assignments' => TicketAssignment::byStatus('completed')->count(),
-                'avg_resolution_time' => TicketAssignment::byStatus('completed')
-                                                       ->selectRaw('AVG(TIMESTAMPDIFF(HOUR, assigned_at, completed_at)) as avg_hours')
-                                                       ->value('avg_hours') ?? 0,
+                'avg_resolution_time' => $this->getAverageAssignmentResolutionTime(),
             ],
         ];
         
@@ -301,5 +309,52 @@ class ReportAnalyticsController extends Controller
                 fputcsv($file, [$currentKey, $value]);
             }
         }
+    }
+    
+    /**
+     * Get resolution times by category (SQLite-compatible).
+     */
+    private function getResolutionTimesByCategory()
+    {
+        $reports = Report::whereNotNull('resolved_at')
+                        ->select('category', 'created_at', 'resolved_at')
+                        ->get();
+        
+        $categoryTimes = $reports->groupBy('category')->map(function ($categoryReports) {
+            $totalHours = $categoryReports->sum(function ($report) {
+                $created = \Carbon\Carbon::parse($report->created_at);
+                $resolved = \Carbon\Carbon::parse($report->resolved_at);
+                return $created->diffInHours($resolved);
+            });
+            
+            return [
+                'category' => $categoryReports->first()->category,
+                'avg_hours' => round($totalHours / $categoryReports->count(), 2)
+            ];
+        });
+        
+        return $categoryTimes->values();
+    }
+    
+    /**
+     * Get average assignment resolution time (SQLite-compatible).
+     */
+    private function getAverageAssignmentResolutionTime()
+    {
+        $assignments = TicketAssignment::byStatus('completed')
+                                    ->select('assigned_at', 'completed_at')
+                                    ->get();
+        
+        if ($assignments->isEmpty()) {
+            return 0;
+        }
+        
+        $totalHours = $assignments->sum(function ($assignment) {
+            $assigned = \Carbon\Carbon::parse($assignment->assigned_at);
+            $completed = \Carbon\Carbon::parse($assignment->completed_at);
+            return $assigned->diffInHours($completed);
+        });
+        
+        return round($totalHours / $assignments->count(), 2);
     }
 }

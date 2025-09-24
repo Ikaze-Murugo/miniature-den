@@ -19,6 +19,24 @@ class User extends Authenticatable
         'verification_token',
         'verification_expires_at',
         'is_verified',
+        // Profile fields
+        'profile_picture',
+        'bio',
+        'phone_number',
+        'date_of_birth',
+        'gender',
+        'location',
+        'website',
+        'social_links',
+        'preferences',
+        'last_active_at',
+        'profile_completion_percentage',
+        'business_name',
+        'business_license',
+        'verification_status',
+        'admin_level',
+        'admin_permissions',
+        'emergency_contact',
     ];
 
     protected $hidden = [
@@ -34,6 +52,12 @@ class User extends Authenticatable
             'is_active' => 'boolean',
             'verification_expires_at' => 'datetime',
             'is_verified' => 'boolean',
+            'date_of_birth' => 'date',
+            'social_links' => 'array',
+            'preferences' => 'array',
+            'last_active_at' => 'datetime',
+            'admin_permissions' => 'array',
+            'emergency_contact' => 'array',
         ];
     }
 
@@ -314,5 +338,126 @@ class User extends Authenticatable
                     ->pluck('name')
                     ->unique()
                     ->toArray();
+    }
+
+    // Profile relationships
+    public function userStatistics()
+    {
+        return $this->hasOne(UserStatistics::class);
+    }
+
+    public function landlordStatistics()
+    {
+        return $this->hasOne(LandlordStatistics::class);
+    }
+
+    public function adminStatistics()
+    {
+        return $this->hasOne(AdminStatistics::class);
+    }
+
+    // Profile helper methods
+    public function getProfilePictureUrl()
+    {
+        if ($this->profile_picture) {
+            return asset('storage/' . $this->profile_picture);
+        }
+        return asset('images/default-avatar.png');
+    }
+
+    public function getProfileCompletionPercentage()
+    {
+        $totalFields = 8; // Total profile fields
+        $completedFields = 0;
+
+        if ($this->profile_picture) $completedFields++;
+        if ($this->bio) $completedFields++;
+        if ($this->phone_number) $completedFields++;
+        if ($this->date_of_birth) $completedFields++;
+        if ($this->gender) $completedFields++;
+        if ($this->location) $completedFields++;
+        if ($this->website) $completedFields++;
+        
+        // Handle social_links safely - check if it's an array and has content
+        $socialLinks = $this->social_links;
+        if (is_array($socialLinks) && count($socialLinks) > 0) {
+            $completedFields++;
+        }
+
+        return round(($completedFields / $totalFields) * 100);
+    }
+
+    public function updateLastActive()
+    {
+        $this->update(['last_active_at' => now()]);
+    }
+
+    public function getSocialLinks()
+    {
+        return $this->social_links ?? [];
+    }
+
+    public function getPreferences()
+    {
+        return $this->preferences ?? [];
+    }
+
+    public function getEmergencyContact()
+    {
+        return $this->emergency_contact ?? [];
+    }
+
+    // Role-specific profile methods
+    public function getRenterProfile()
+    {
+        return [
+            'basic_info' => [
+                'name' => $this->name,
+                'email' => $this->email,
+                'profile_picture' => $this->getProfilePictureUrl(),
+                'bio' => $this->bio,
+                'location' => $this->location,
+                'phone_number' => $this->phone_number,
+            ],
+            'statistics' => $this->userStatistics,
+            'completion_percentage' => $this->getProfileCompletionPercentage(),
+        ];
+    }
+
+    public function getLandlordProfile()
+    {
+        return [
+            'basic_info' => [
+                'name' => $this->name,
+                'email' => $this->email,
+                'profile_picture' => $this->getProfilePictureUrl(),
+                'bio' => $this->bio,
+                'location' => $this->location,
+                'phone_number' => $this->phone_number,
+                'business_name' => $this->business_name,
+                'business_license' => $this->business_license,
+                'verification_status' => $this->verification_status,
+            ],
+            'statistics' => $this->landlordStatistics,
+            'completion_percentage' => $this->getProfileCompletionPercentage(),
+        ];
+    }
+
+    public function getAdminProfile()
+    {
+        return [
+            'basic_info' => [
+                'name' => $this->name,
+                'email' => $this->email,
+                'profile_picture' => $this->getProfilePictureUrl(),
+                'bio' => $this->bio,
+                'location' => $this->location,
+                'phone_number' => $this->phone_number,
+                'admin_level' => $this->admin_level,
+                'admin_permissions' => $this->admin_permissions,
+            ],
+            'statistics' => $this->adminStatistics,
+            'completion_percentage' => $this->getProfileCompletionPercentage(),
+        ];
     }
 }

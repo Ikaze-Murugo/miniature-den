@@ -185,6 +185,11 @@ Route::middleware(['auth', 'verified', 'role:admin', 'rate_limit.admin'])->prefi
     Route::patch('/properties/{property}/reject', [AdminController::class, 'rejectProperty'])->name('admin.properties.reject');
     Route::get('/properties', [AdminController::class, 'allProperties'])->name('admin.properties.index');
     Route::patch('/properties/{property}/priority', [AdminController::class, 'updatePropertyPriority'])->name('admin.properties.priority');
+    
+    // Property update approval routes
+    Route::get('/properties/pending-updates', [AdminController::class, 'pendingUpdates'])->name('admin.properties.pending-updates');
+    Route::post('/properties/{property}/approve-update', [AdminController::class, 'approveUpdate'])->name('admin.properties.approve-update');
+    Route::post('/properties/{property}/reject-update', [AdminController::class, 'rejectUpdate'])->name('admin.properties.reject-update');
     Route::get('/pending-reviews', [AdminController::class, 'pendingReviews'])->name('admin.pending-reviews');
     Route::patch('/reviews/{review}/approve', [ReviewController::class, 'approve'])->name('admin.reviews.approve');
     Route::patch('/reviews/{review}/reject', [ReviewController::class, 'reject'])->name('admin.reviews.reject');
@@ -237,7 +242,8 @@ Route::middleware(['auth', 'verified', 'role:admin', 'rate_limit.admin'])->prefi
     Route::get('/assignments/statistics', [App\Http\Controllers\Admin\TicketAssignmentController::class, 'statistics'])->name('admin.assignments.statistics');
     
     // Analytics Routes
-    Route::get('/analytics', [App\Http\Controllers\Admin\ReportAnalyticsController::class, 'dashboard'])->name('admin.analytics.dashboard');
+    Route::get('/analytics', [App\Http\Controllers\Admin\AnalyticsController::class, 'index'])->name('admin.analytics.index');
+    Route::get('/analytics/dashboard', [App\Http\Controllers\Admin\ReportAnalyticsController::class, 'dashboard'])->name('admin.analytics.dashboard');
     Route::get('/analytics/overview', [App\Http\Controllers\Admin\ReportAnalyticsController::class, 'overview'])->name('admin.analytics.overview');
     Route::get('/analytics/reports', [App\Http\Controllers\Admin\ReportAnalyticsController::class, 'reports'])->name('admin.analytics.reports');
     Route::get('/analytics/admins', [App\Http\Controllers\Admin\ReportAnalyticsController::class, 'admins'])->name('admin.analytics.admins');
@@ -245,9 +251,37 @@ Route::middleware(['auth', 'verified', 'role:admin', 'rate_limit.admin'])->prefi
 });
 
 Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    // Enhanced profile routes
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    
+    // Profile management routes
+    Route::post('/profile/avatar', [ProfileController::class, 'updateAvatar'])->name('profile.avatar');
+    Route::get('/profile/settings', [ProfileController::class, 'settings'])->name('profile.settings');
+    Route::patch('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
+    Route::patch('/profile/preferences', [ProfileController::class, 'updatePreferences'])->name('profile.preferences');
+    Route::get('/profile/statistics', [ProfileController::class, 'statistics'])->name('profile.statistics');
+    
+    // Role-specific profile routes
+    Route::middleware(['role:renter'])->group(function () {
+        Route::get('/profile/favorites', [ProfileController::class, 'favorites'])->name('profile.favorites');
+        Route::get('/profile/reviews', [ProfileController::class, 'reviews'])->name('profile.reviews');
+        Route::get('/profile/messages', [ProfileController::class, 'messages'])->name('profile.messages');
+    });
+    
+    Route::middleware(['role:landlord'])->group(function () {
+        Route::get('/profile/properties', [ProfileController::class, 'properties'])->name('profile.properties');
+        Route::get('/profile/tenants', [ProfileController::class, 'tenants'])->name('profile.tenants');
+        Route::get('/profile/analytics', [ProfileController::class, 'analytics'])->name('profile.analytics');
+    });
+    
+    Route::middleware(['role:admin'])->group(function () {
+        Route::get('/profile/permissions', [ProfileController::class, 'permissions'])->name('profile.permissions');
+        Route::get('/profile/activity', [ProfileController::class, 'activity'])->name('profile.activity');
+        Route::get('/profile/system', [ProfileController::class, 'system'])->name('profile.system');
+    });
 });
 
 require __DIR__.'/auth.php';

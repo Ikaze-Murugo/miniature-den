@@ -181,13 +181,33 @@ class AdminManagementController extends Controller
             'total_tickets' => $admin->assignedTickets()->count(),
             'active_tickets' => $admin->activeTickets()->count(),
             'completed_tickets' => $admin->completedTickets()->count(),
-            'avg_resolution_time' => $admin->completedTickets()
-                                         ->selectRaw('AVG(TIMESTAMPDIFF(HOUR, assigned_at, completed_at)) as avg_hours')
-                                         ->value('avg_hours') ?? 0,
+            'avg_resolution_time' => $this->getAdminAverageResolutionTime($admin),
             'roles' => $admin->adminRoles()->pluck('name'),
             'permissions' => $admin->getAdminPermissions(),
         ];
         
         return response()->json($metrics);
+    }
+    
+    /**
+     * Get admin average resolution time (SQLite-compatible).
+     */
+    private function getAdminAverageResolutionTime(User $admin)
+    {
+        $assignments = $admin->completedTickets()
+                            ->select('assigned_at', 'completed_at')
+                            ->get();
+        
+        if ($assignments->isEmpty()) {
+            return 0;
+        }
+        
+        $totalHours = $assignments->sum(function ($assignment) {
+            $assigned = \Carbon\Carbon::parse($assignment->assigned_at);
+            $completed = \Carbon\Carbon::parse($assignment->completed_at);
+            return $assigned->diffInHours($completed);
+        });
+        
+        return round($totalHours / $assignments->count(), 2);
     }
 }

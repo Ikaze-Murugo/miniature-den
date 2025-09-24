@@ -5,10 +5,37 @@
                 {{ $property->title }}
             </h2>
             <div class="flex space-x-2">
-                <a href="{{ route('reports.create.property', $property) }}" 
-                   class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors duration-200">
-                    Report Property
-                </a>
+                @if(auth()->user()->isLandlord() && $property->landlord_id === auth()->id())
+                    <a href="{{ route('properties.edit', $property) }}" 
+                       class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors duration-200">
+                        Edit Property
+                    </a>
+                    
+                    <form method="POST" action="{{ route('properties.destroy', $property) }}" 
+                          onsubmit="return confirm('Are you sure you want to delete this property?')" class="inline">
+                        @csrf
+                        @method('DELETE')
+                        <button type="submit" 
+                                class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors duration-200">
+                            Delete Property
+                        </button>
+                    </form>
+                @endif
+                
+                @if(auth()->user()->isAdmin())
+                    <a href="{{ route('properties.edit', $property) }}" 
+                       class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors duration-200">
+                        Manage Property
+                    </a>
+                @endif
+                
+                @if(auth()->user()->isRenter())
+                    <a href="{{ route('reports.create.property', $property) }}" 
+                       class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors duration-200">
+                        Report Property
+                    </a>
+                @endif
+                
                 <a href="{{ route('properties.index') }}" 
                    class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors duration-200">
                     Back to Properties
@@ -48,6 +75,38 @@
                     
                     <!-- Property Details -->
                     <div class="bg-white p-6 rounded-lg shadow">
+                        <!-- Property Status Information -->
+                        @if($property->version_status === 'original' && $property->hasPendingUpdates())
+                            <div class="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 text-yellow-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <div>
+                                        <h3 class="text-sm font-medium text-yellow-800">Pending Updates</h3>
+                                        <p class="text-sm text-yellow-700 mt-1">
+                                            You have pending updates for this property that are waiting for admin approval. 
+                                            The current approved version is still visible to renters.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        @elseif($property->version_status === 'pending_update')
+                            <div class="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                                <div class="flex items-center">
+                                    <svg class="w-5 h-5 text-blue-600 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <div>
+                                        <h3 class="text-sm font-medium text-blue-800">Update Pending Approval</h3>
+                                        <p class="text-sm text-blue-700 mt-1">
+                                            This is a pending update version. It will be visible to renters once approved by an admin.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
                         <h1 class="text-3xl font-bold mb-4">{{ $property->title }}</h1>
                         <p class="text-gray-600 mb-6">{{ $property->description }}</p>
                         

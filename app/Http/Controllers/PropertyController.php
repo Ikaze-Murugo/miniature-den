@@ -17,15 +17,25 @@ class PropertyController extends Controller
         $user = Auth::user();
         
         if ($user && $user->isAdmin()) {
-            // Admin sees all properties
-            $properties = Property::with(['landlord', 'images'])->paginate(12);
+            // Admin sees all properties including pending updates
+            $properties = Property::with(['landlord', 'images', 'pendingUpdates', 'latestApprovedVersion'])
+                                ->orderBy('created_at', 'desc')
+                                ->paginate(12);
         } elseif ($user && $user->isLandlord()) {
-            // Landlord sees only their properties
-            $properties = Property::where('landlord_id', $user->id)->with(['landlord', 'images'])->paginate(12);
+            // Landlord sees only their properties (original versions)
+            $properties = Property::where('landlord_id', $user->id)
+                                ->where('version_status', 'original')
+                                ->with(['landlord', 'images', 'pendingUpdates'])
+                                ->orderBy('created_at', 'desc')
+                                ->paginate(12);
         } else {
-            // Everyone else (renters, guests) sees all active, available properties
+            // Everyone else (renters, guests) sees approved properties only
             $properties = Property::where('status', 'active')
                                 ->where('is_available', true)
+                                ->where(function($query) {
+                                    $query->where('version_status', 'original')
+                                          ->orWhere('version_status', 'approved_update');
+                                })
                                 ->with(['landlord', 'images'])
                                 ->orderBy('created_at', 'desc')
                                 ->paginate(12);
@@ -254,11 +264,8 @@ class PropertyController extends Controller
             'pets_allowed' => 'boolean',
             'smoking_allowed' => 'boolean',
             'is_available' => 'sometimes|boolean',
+            'update_notes' => 'nullable|string|max:500',
         ]);
-
-        if (Auth::user()->isAdmin()) {
-            $validated['status'] = $request->input('status', $property->status);
-        }
 
         // Handle checkbox fields - set to false if not present
         $checkboxFields = [
@@ -271,7 +278,40 @@ class PropertyController extends Controller
             $validated[$field] = $request->has($field) ? (bool) $request->input($field) : false;
         }
 
-        $property->update($validated);
+        // Remove update_notes from validated data as it's handled separately
+        $updateNotes = $validated['update_notes'] ?? null;
+        unset($validated['update_notes']);
+
+        // Check if this is an admin updating directly
+        if (Auth::user()->isAdmin()) {
+            $validated['status'] = $request->input('status', $property->status);
+            $property->update($validated);
+            
+            return redirect()->route('properties.index')
+                            ->with('success', 'Property updated successfully!');
+        }
+
+        // For landlords: check if property is approved and needs versioning
+        if ($property->status === 'active' && $property->version_status === 'original') {
+            // Property is approved - create a pending version
+            $changes = array_diff_assoc($validated, $property->toArray());
+            
+            if (!empty($changes)) {
+                $pendingVersion = $property->createPendingVersion($changes, $updateNotes);
+                
+                return redirect()->route('properties.index')
+                                ->with('success', 'Property update submitted for admin approval. You will be notified once it\'s reviewed.');
+            } else {
+                return redirect()->route('properties.index')
+                                ->with('info', 'No changes detected.');
+            }
+        } else {
+            // Property is not approved yet - update directly
+            $property->update($validated);
+            
+            return redirect()->route('properties.index')
+                            ->with('success', 'Property updated successfully!');
+        }
 
         // Handle new image uploads
         if ($request->hasFile('new_images')) {
@@ -292,9 +332,6 @@ class PropertyController extends Controller
                 ]);
             }
         }
-
-        return redirect()->route('properties.index')
-                        ->with('success', 'Property updated successfully!');
     }
 
     public function destroy(Property $property)

@@ -135,4 +135,59 @@ class AdminController extends Controller
         return redirect()->back()
                         ->with('success', 'Property priority updated successfully!');
     }
+
+    /**
+     * Show pending property updates
+     */
+    public function pendingUpdates()
+    {
+        $pendingUpdates = Property::where('version_status', 'pending_update')
+                                 ->with(['landlord', 'parentProperty', 'images'])
+                                 ->orderBy('update_requested_at', 'desc')
+                                 ->paginate(20);
+
+        return view('admin.properties.pending-updates', compact('pendingUpdates'));
+    }
+
+    /**
+     * Approve a property update
+     */
+    public function approveUpdate(Request $request, Property $property)
+    {
+        if ($property->version_status !== 'pending_update') {
+            return redirect()->back()->with('error', 'This property update is not pending approval.');
+        }
+
+        try {
+            $property->approveUpdate();
+            
+            return redirect()->route('admin.properties.pending-updates')
+                            ->with('success', 'Property update approved successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to approve update: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Reject a property update
+     */
+    public function rejectUpdate(Request $request, Property $property)
+    {
+        if ($property->version_status !== 'pending_update') {
+            return redirect()->back()->with('error', 'This property update is not pending approval.');
+        }
+
+        $request->validate([
+            'rejection_reason' => 'required|string|max:500',
+        ]);
+
+        try {
+            $property->rejectUpdate($request->rejection_reason);
+            
+            return redirect()->route('admin.properties.pending-updates')
+                            ->with('success', 'Property update rejected successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to reject update: ' . $e->getMessage());
+        }
+    }
 }
