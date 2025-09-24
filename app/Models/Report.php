@@ -129,6 +129,12 @@ class Report extends Model
         return $this->belongsTo(Property::class, 'reported_property_id');
     }
 
+    // Alias for backward compatibility
+    public function property(): BelongsTo
+    {
+        return $this->reportedProperty();
+    }
+
     public function reportedMessage(): BelongsTo
     {
         return $this->belongsTo(Message::class, 'reported_message_id');
