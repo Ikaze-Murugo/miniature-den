@@ -86,7 +86,7 @@
                                         <input type="file" name="profile_picture" id="profile_picture" accept="image/*"
                                                class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
                                                onchange="previewImage(this)">
-                                        <p class="mt-1 text-xs text-gray-500">PNG, JPG, GIF up to 2MB</p>
+                                        <p class="mt-1 text-xs text-gray-500">PNG, JPG, or GIF up to 2MB</p>
                                     </div>
                                 </div>
                             </div>
